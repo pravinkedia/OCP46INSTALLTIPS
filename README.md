@@ -66,26 +66,33 @@ Refer to the script create_manifest_auto.sh
 
 ### Ports required for LB, Master/Worker node communications
 
-Source IP: Master/Worker nodes
-
-Destination IP: LB nodes (Haproxy based load Balancer)
-
-Ports (TCP) in Bi-directional manner	22
-80
-443
-8080
-5000
-5001
-5002
-5003
-5004
-5005
+	Source IP: Master/Worker nodes
+	Destination IP: LB nodes (Haproxy based load Balancer)
+	Ports (TCP) in Bi-directional manner	
+	22
+	80
+	443
+	8080
+	5000
+	5001
+	5002
+	5003
+	5004
+	5005
 	
-6443
-22623
+	6443
+	22623
 	
-2379
-2380
+	2379
+	2380
+
+	For Masters:
+	6443
+	22623
+	
+	For Workers:
+	443
+	80
 
 ### Make the /etc/resolv.conf entries permanent
 
