@@ -26,8 +26,43 @@ Refer to the script create_manifest_auto.sh
 
 ### Steps to install support toolbox inside the Openshift container
 
+#### Run the commands On Internet connected server
+
+	podman login registry.redhat.io
+	Username:xxxxxxxx
+	Password:xxxxxxxx
+	Login Succeeded!
 	
+	podman pull registry.redhat.io/rhel8/support-tools:latest
+	podman save -o /tmp/support-tools.tar registry.redhat.io/rhel8/support-tools:latest
+	ls -ltr /tmp/support-tools.tar
+
+#### Run the following commands after copying the above tar ball(support-tools.tar) into the LB node in ibm folder execute the below commands in the LB node
+
+	podman load -i /ibm/support-tools.tar
+	podman pull mangalbp01.icpdanalytics.icloudanalytics.sbi:5000/support-tools:latest
+	podman tag registry.redhat.io/rhel8/support-tools:latest mangalbp01.icpdanalytics.icloudanalytics.sbi:5000/support-tools:latest
+	podman images
+	
+	podman login mangalbp01.icpdanalytics.icloudanalytics.sbi:5000
+	Username:xxxxxxxx
+	Password:xxxxxxxx
+	
+	podman push mangalbp01.icpdanalytics.icloudanalytics.sbi:5000/support-tools:latest
+
+#### Run the following commands after pushing the support-tools in LB node as above then run the below steps in all the Master nodes
+
+	podman login mangalbp01.icpdanalytics.icloudanalytics.sbi:5000
+	Username:xxxxxxxx
+	Password:xxxxxxxx
+	
+	podman run -it --name toolbox-root --privileged --ipc=host --net=host --pid=host -e HOST=/host -e NAME=toolbox-root -e IMAGE=mangalbp01.icpdanalytics.icloudanalytics.sbi:5000/support-tools:latest -v /run:/run -v /var/log:/var/log -v /etc/machine-id:/etc/machine-id -v /etc/localtime:/etc/localtime -v /:/host mangalbp01.icpdanalytics.icloudanalytics.sbi:5000/support-tools:latest
+
 	podman run -it --name toolbox-root --privileged --ipc=host --net=host --pid=host -e HOST=/host -e NAME=toolbox-root -e IMAGE=<mirror_registry_hostname>:5000/support-tools:latest -v /run:/run -v /var/log:/var/log -v /etc/machine-id:/etc/machine-id -v /etc/localtime:/etc/localtime -v /:/host <mirror_registry_hostname>:5000/support-tools:latest
+
+##### If needed rm and rerun with correct options
+
+	podman rm -f fd029aca08099da867ff18e08f201941b5a9d0d109aee859ff1bb31b472547f2
 
 ### Ports required for LB, Master/Worker node communications
 
@@ -51,4 +86,16 @@ Ports (TCP) in Bi-directional manner	22
 	
 2379
 2380
+
+### Make the /etc/resolv.conf entries permanent
+
+	vi /etc/resolv.conf
+	search icpdanalytics.icloudanalytics.sbi
+	nameserver 10.176.126.200
+
+	chattr +i /etc/resolv.conf
+	
+### Collect SOS report on RHCOS inside the master nodes
+
+	sosreport -k crio.all=on -k crio.logs=on
 
